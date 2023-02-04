@@ -176,6 +176,7 @@ type Options struct {
 	SshPubKeyFile      string            //ssh host public key file path
 	SshCertFile        string            //ssh host certificate file path
 	SshConfigFile      string            //sshd config file path
+	SshHostKeyType     hostkey.KeyType   //ssh host key type - rsa or ecdsa
 	PrivateIp          string            //instance private ip
 	EC2Document        string            //EC2 instance identity document
 	EC2Signature       string            //EC2 instance identity document pkcs7 signature
@@ -460,6 +461,7 @@ func setOptions(config *Config, account *ConfigAccount, profileConfig *AccessPro
 	certDir := fmt.Sprintf("%s/certs", siaDir)
 	keyDir := fmt.Sprintf("%s/keys", siaDir)
 	backupDir := fmt.Sprintf("%s/backup", siaDir)
+	sshHostKeyType := hostkey.Rsa
 
 	if config != nil {
 		useRegionalSTS = config.UseRegionalSTS
@@ -494,6 +496,9 @@ func setOptions(config *Config, account *ConfigAccount, profileConfig *AccessPro
 		}
 		if account.Group == "" && config.Group != "" {
 			account.Group = config.Group
+		}
+		if config.SshHostKeyType != 0 {
+			sshHostKeyType = config.SshHostKeyType
 		}
 
 		//update generate role and rotate key options if config is provided
@@ -654,6 +659,7 @@ func setOptions(config *Config, account *ConfigAccount, profileConfig *AccessPro
 		Threshold:        account.Threshold,
 		SshThreshold:     account.SshThreshold,
 		FileDirectUpdate: fileDirectUpdate,
+		SshHostKeyType:   sshHostKeyType,
 	}, nil
 }
 

@@ -236,7 +236,7 @@ func registerSvc(svc options.Service, data *attestation.AttestationData, ztsUrl 
 				return err
 			}
 		} else {
-			sshCertRequest = util.GenerateSSHHostRequest(opts.SshPubKeyFile, opts.Domain, svc.Name, hostname, opts.InstanceId, opts.PrivateIp, opts.ZTSAWSDomains)
+			sshCertRequest = util.GenerateSSHHostRequest(opts.SshPubKeyFile, opts.Domain, svc.Name, hostname, opts.PrivateIp, opts.InstanceId, opts.ZTSAWSDomains)
 		}
 	}
 
@@ -343,7 +343,7 @@ func refreshSvc(svc options.Service, data *attestation.AttestationData, ztsUrl s
 				return err
 			}
 		} else {
-			sshCertRequest = util.GenerateSSHHostRequest(opts.SshPubKeyFile, opts.Domain, svc.Name, hostname, opts.InstanceId, opts.PrivateIp, opts.ZTSAWSDomains)
+			sshCertRequest = util.GenerateSSHHostRequest(opts.SshPubKeyFile, opts.Domain, svc.Name, hostname, opts.PrivateIp, opts.InstanceId, opts.ZTSAWSDomains)
 		}
 	}
 

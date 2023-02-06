@@ -66,12 +66,29 @@ class EnforcementStateList extends React.Component {
     constructor(props) {
         super(props);
         this.localDate = new DateUtils();
+        this.getScopeString = this.getScopeString.bind(this);
     }
 
     onClickDelete(assertionId, conditionId, policyName) {
         if (this.props.list.length > 1) {
             this.props.deleteCondition(assertionId, conditionId, policyName);
         }
+    }
+
+    getScopeString(scopeNumStr) {
+        let scope = Number(scopeNumStr);
+        let scopeStr = "";
+        if ((scope & 3) == 3) {
+            scopeStr += "All";
+        } else {
+            if ((scope & 1) == 1) {
+                scopeStr += "OnPrem ";
+            }
+            if ((scope & 2) == 2) {
+                scopeStr += "AWS ";
+            }
+        }
+        return scopeStr;
     }
 
     render() {
@@ -87,12 +104,14 @@ class EnforcementStateList extends React.Component {
                     item['id'],
                     policyName[1]
                 );
+                let scopeString = this.getScopeString(item['scope']);
                 return (
                     <StyledTr key={item + i + new Date().getTime()}>
                         <StyledTd>{item['enforcementstate']}</StyledTd>
                         <StyledTd>
                             {item['instances'].replace(/,/g, '\n')}
                         </StyledTd>
+                        <StyledTd>{scopeString}</StyledTd>
                         <StyledTd>
                             <Menu
                                 placement='bottom-start'
@@ -127,11 +146,12 @@ class EnforcementStateList extends React.Component {
             >
                 <StyleTable>
                     <thead>
-                        <StyledTr>
-                            <StyledTh> Enforcement State </StyledTh>
-                            <StyledTh> Hosts </StyledTh>
-                            <StyledTh> Action </StyledTh>
-                        </StyledTr>
+                    <StyledTr>
+                        <StyledTh> Enforcement State </StyledTh>
+                        <StyledTh> Hosts </StyledTh>
+                        <StyledTh> Scope </StyledTh>
+                        <StyledTh> Action </StyledTh>
+                    </StyledTr>
                     </thead>
                     <tbody>{rows}</tbody>
                 </StyleTable>

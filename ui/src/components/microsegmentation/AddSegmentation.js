@@ -171,6 +171,19 @@ class AddSegmentation extends React.Component {
             this.validateMicrosegmentationPolicy.bind(this);
         this.validateFields = this.validateFields.bind(this);
         this.validateServiceNames = this.validateServiceNames.bind(this);
+        this.updateScope = this.updateScope.bind(this);
+
+        let pesList =
+            this.props.editMode && this.props.data['conditionsList']
+                ? JSON.parse(JSON.stringify(this.props.data['conditionsList']))
+                : [
+                      {
+                          enforcementstate: 'report',
+                          instances: '',
+                          scope: 1,
+                          id: 1,
+                      },
+                  ];
 
         this.state = {
             category: this.props.editMode
@@ -219,14 +232,12 @@ class AddSegmentation extends React.Component {
                 ? this.props.data['identifier']
                 : '',
             justification: '',
-            PESList:
-                this.props.editMode && this.props.data['conditionsList']
-                    ? JSON.parse(
-                          JSON.stringify(this.props.data['conditionsList'])
-                      )
-                    : [{ enforcementstate: 'report', instances: '', id: 1 }],
+            PESList: pesList,
             data: props.data,
             validationCheckbox: false,
+            scopeOnPremCheckbox: pesList.entries().next().scope & 1,
+            scopeAwsCheckbox: pesList.entries().next().scope & 2,
+            scopeAllCheckbox: pesList.entries().next().scope & 3,
             saving: 'todo',
             validationError: 'none',
             validationStatus: 'valid',
@@ -261,19 +272,65 @@ class AddSegmentation extends React.Component {
         }
     }
 
+    updateScope(scopeVal) {
+        const list = [...this.state.PESList];
+        list[0]['scope'] = scopeVal;
+        if (list.length == 2) {
+            list[1]['scope'] = scopeVal;
+        }
+        return list;
+    }
+
     inputChanged(evt, key) {
         let value = '';
-
-        if (key === 'validationCheckbox') {
-            value = evt.target.checked;
-        } else if (evt.target) {
-            value = evt.target.value;
+        if (key == 'scopeAllCheckbox') {
+            let pesList = this.updateScope(evt.target.checked ? 3 : 0);
+            this.setState({
+                scopeOnPremCheckbox: evt.target.checked,
+                scopeAwsCheckbox: evt.target.checked,
+                scopeAllCheckbox: evt.target.checked,
+                PESList: pesList,
+            });
+        } else if (
+            key === 'scopeOnPremCheckbox' ||
+            key === 'scopeAwsCheckbox'
+        ) {
+            let scopeOnPremCheckboxVal =
+                key === 'scopeOnPremCheckbox'
+                    ? evt.target.checked
+                    : this.state.scopeOnPremCheckbox;
+            let scopeAwsCheckboxVal =
+                key === 'scopeAwsCheckbox'
+                    ? evt.target.checked
+                    : this.state.scopeAwsCheckbox;
+            let scopeAllCheckboxVal =
+                scopeOnPremCheckboxVal && scopeAwsCheckboxVal;
+            let scope = 0;
+            if (scopeOnPremCheckboxVal) {
+                scope |= 1;
+            }
+            if (scopeAwsCheckboxVal) {
+                scope |= 2;
+            }
+            let pesList = this.updateScope(scope);
+            this.setState({
+                scopeOnPremCheckbox: scopeOnPremCheckboxVal,
+                scopeAwsCheckbox: scopeAwsCheckboxVal,
+                scopeAllCheckbox: scopeAllCheckboxVal,
+                PESList: pesList,
+            });
         } else {
-            value = evt ? evt : '';
+            if (key === 'validationCheckbox') {
+                value = evt.target.checked;
+            } else if (evt.target) {
+                value = evt.target.value;
+            } else {
+                value = evt ? evt : '';
+            }
+            this.setState({
+                [key]: value,
+            });
         }
-        this.setState({
-            [key]: value,
-        });
     }
 
     editValidationPolicy() {
@@ -1194,7 +1251,45 @@ class AddSegmentation extends React.Component {
                         disabled={this.props.editMode}
                     />
                 </SectionDiv>
-
+                <SectionDiv>
+                    <StyledInputLabel>Scope</StyledInputLabel>
+                    <CheckBoxSectionDiv>
+                        <StyledCheckBox
+                            checked={this.state.scopeAllCheckbox}
+                            name={'checkbox-scope-all' + this.state.isCategory}
+                            id={'checkbox-scope-all' + this.state.isCategory}
+                            key={'checkbox-scope-all' + this.state.isCategory}
+                            label='All'
+                            onChange={(event) =>
+                                this.inputChanged(event, 'scopeAllCheckbox')
+                            }
+                        />
+                        <StyledCheckBox
+                            checked={this.state.scopeOnPremCheckbox}
+                            name={
+                                'checkbox-scope-onprem' + this.state.isCategory
+                            }
+                            id={'checkbox-scope-onprem' + this.state.isCategory}
+                            key={
+                                'checkbox-scope-onprem' + this.state.isCategory
+                            }
+                            label='On-Prem'
+                            onChange={(event) =>
+                                this.inputChanged(event, 'scopeOnPremCheckbox')
+                            }
+                        />
+                        <StyledCheckBox
+                            checked={this.state.scopeAwsCheckbox}
+                            name={'checkbox-scope-aws' + this.state.isCategory}
+                            id={'checkbox-scope-aws' + this.state.isCategory}
+                            key={'checkbox-scope-aws' + this.state.isCategory}
+                            label='AWS'
+                            onChange={(event) =>
+                                this.inputChanged(event, 'scopeAwsCheckbox')
+                            }
+                        />
+                    </CheckBoxSectionDiv>
+                </SectionDiv>
                 {this.state.PESList.map((x, i) => {
                     return (
                         <SectionDiv>

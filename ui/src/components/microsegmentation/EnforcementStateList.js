@@ -75,16 +75,15 @@ class EnforcementStateList extends React.Component {
         }
     }
 
-    getScopeString(scopeNumStr) {
-        let scope = Number(scopeNumStr);
+    getScopeString(item) {
         let scopeStr = "";
-        if ((scope & 3) == 3) {
+        if (item['scopeall'] === 'true') {
             scopeStr += "All";
         } else {
-            if ((scope & 1) == 1) {
+            if (item['scopeonprem'] === 'true') {
                 scopeStr += "OnPrem ";
             }
-            if ((scope & 2) == 2) {
+            if (item['scopeaws'] === 'true') {
                 scopeStr += "AWS ";
             }
         }
@@ -104,7 +103,7 @@ class EnforcementStateList extends React.Component {
                     item['id'],
                     policyName[1]
                 );
-                let scopeString = this.getScopeString(item['scope']);
+                let scopeString = this.getScopeString(item);
                 return (
                     <StyledTr key={item + i + new Date().getTime()}>
                         <StyledTd>{item['enforcementstate']}</StyledTd>
